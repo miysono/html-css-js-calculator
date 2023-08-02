@@ -2,6 +2,7 @@
 
 //WHAT TO DO NEXT / FIXES
 //CHAGNE THE SIGN IF THE USER DECIDES TO!
+//cleaner code
 
 //MATH SINGS ELEMENTS
 const mathSigns = document.querySelectorAll(`#sign`);
@@ -24,7 +25,7 @@ let lastSignValue = "";
 
 //Checkers
 let invalidExpression = false;
-let calculationNumber = true; //checks if it is the first calculation
+let calculationNumber = true; //checks if it is the first calculation (beginning/after operation)
 
 //START OPERATIONS
 upperDisplayElement.classList.add(`hidden`);
@@ -32,13 +33,14 @@ upperDisplayElement.classList.add(`hidden`);
 //crate number
 numbers.forEach((number) => {
   number.addEventListener(`click`, function () {
-    //check for invalid expresion
+    //check for invalid expresion - like(NaN)
     if (invalidExpression) {
       resetValues();
       invalidExpression = false;
     }
     //crate the number
     actualValue += number.value;
+    //check for 00-number like exceptions and display
     if (actualValue === `0${number.value}`) actualValue = `${number.value}`;
     outputElement.value = actualValue;
   });
@@ -47,12 +49,12 @@ numbers.forEach((number) => {
 //Process Signs
 mathSigns.forEach((sign) => {
   sign.addEventListener(`click`, function () {
-    //Update the value of the calculation BAR
+    //Update the value of the upper calculation BAR
     upperDisplayElement.classList.remove(`hidden`);
 
-    //check for the first calculation
+    //check for the FIRST calculation
     if (calculationNumber) {
-      //make the expression valid so the program can work after equal sign
+      //make the expression valid so the program can work after equal sign - like math signs
       invalidExpression = false;
       lastValue = Number(actualValue);
       upperDisplayElement.value = `${actualValue} ${sign.value}`;
@@ -105,18 +107,20 @@ equalElement.addEventListener(`click`, function () {
       //Element changing
       outputElement.value = actualValue;
       upperDisplayElement.classList.add(`hidden`);
-      //mark true so that the program will convert
+      //mark true so that the program will convert => in sign event listener -> wait for the next number
       calculationNumber = true;
-      //reset the value if a new number is created
+      //also mark true to make sure if the user wants a new operation to reset -> number event listner
       invalidExpression = true;
-      //assign the last value so at equal sign press and no operation to show the exact thing!
+      //assign the last value so -> else statement -> actual value = calculus -> always return that -> actual value will be last value in sign listener
       lastValue = "";
     }
   }
   //now process the example of 247/ and then press equal
   else {
+    //value will now not be changed
     outputElement.value = Number(lastValue + actualValue);
     upperDisplayElement.classList.add(`hidden`);
+    //same as upper
     calculationNumber = true;
     invalidExpression = true;
   }
