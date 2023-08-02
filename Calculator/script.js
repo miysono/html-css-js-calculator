@@ -1,7 +1,6 @@
 "use strict";
 
 //WHAT TO DO NEXT / FIXES
-//Check for the 0 division -> it will return NaN, and you can create a number on top of that!
 //CHAGNE THE SIGN IF THE USER DECIDES TO!
 
 //MATH SINGS ELEMENTS
@@ -24,6 +23,7 @@ let operationResult = "";
 let lastSignValue = "";
 
 //Checkers
+let invalidExpression = false;
 let calculationNumber = true; //checks if it is the first calculation
 
 //START OPERATIONS
@@ -32,8 +32,14 @@ upperDisplayElement.classList.add(`hidden`);
 //crate number
 numbers.forEach((number) => {
   number.addEventListener(`click`, function () {
+    //check for invalid expresion
+    if (invalidExpression) {
+      resetValues();
+      invalidExpression = false;
+    }
     //crate the number
     actualValue += number.value;
+    if (actualValue === `0${number.value}`) actualValue = `${number.value}`;
     outputElement.value = actualValue;
   });
 });
@@ -46,6 +52,8 @@ mathSigns.forEach((sign) => {
 
     //check for the first calculation
     if (calculationNumber) {
+      //make the expression valid so the program can work after equal sign
+      invalidExpression = false;
       lastValue = Number(actualValue);
       upperDisplayElement.value = `${actualValue} ${sign.value}`;
       actualValue = "";
@@ -53,16 +61,22 @@ mathSigns.forEach((sign) => {
       lastSignValue = sign.value;
     }
     //check for actual calculus
-    else {
-      console.log(
-        `Last value: ${lastValue}, Current value: ${actualValue}, sign: ${lastSignValue}`
-      );
+    else if (actualValue) {
+      //calculate values
       operationResult = processCalculus(lastValue, actualValue, lastSignValue);
-      outputElement.value = operationResult;
       lastValue = processCalculus(lastValue, actualValue, lastSignValue);
-      actualValue = "";
-      upperDisplayElement.value = `${operationResult} ${sign.value}`;
-      lastSignValue = sign.value;
+      console.log(operationResult);
+      //check for invalid expression
+      if (operationResult == Infinity || operationResult == NaN)
+        processInvalidOutput();
+      else {
+        //display values
+        upperDisplayElement.value = `${operationResult} ${sign.value}`;
+        outputElement.value = operationResult;
+        //reassign values
+        actualValue = "";
+        lastSignValue = sign.value;
+      }
     }
   });
 });
@@ -79,28 +93,37 @@ deleteOneElement.addEventListener(`click`, function () {
 
 //EQUAL FUNCTIONALITY
 equalElement.addEventListener(`click`, function () {
+  console.log(actualValue);
   //first check if the value is truthy!
-  if (actualValue) {
+  console.log(`Current Value: ${actualValue}, Last Value: ${lastValue}`);
+  if (actualValue !== "" && lastValue !== "") {
     //change to actual value so the sign listener will convert it back in the first part
     actualValue = processCalculus(lastValue, actualValue, lastSignValue);
-    //Element changing
-    outputElement.value = actualValue;
+    //now check if the value is invalid or not
+    if (actualValue == Infinity || actualValue == NaN) processInvalidOutput();
+    else {
+      //Element changing
+      outputElement.value = actualValue;
+      upperDisplayElement.classList.add(`hidden`);
+      //mark true so that the program will convert
+      calculationNumber = true;
+      //reset the value if a new number is created
+      invalidExpression = true;
+      //assign the last value so at equal sign press and no operation to show the exact thing!
+      lastValue = "";
+    }
+  }
+  //now process the example of 247/ and then press equal
+  else {
+    outputElement.value = Number(lastValue + actualValue);
     upperDisplayElement.classList.add(`hidden`);
-    //mark true so that the program will convert
     calculationNumber = true;
+    invalidExpression = true;
   }
 });
 
 //CALCULATOR CLEAR
-clearAllElement.addEventListener(`click`, function () {
-  lastValue = "";
-  operationResult = "";
-  calculationNumber = true;
-  actualValue = "";
-  outputElement.value = 0;
-  upperDisplayElement.value = "";
-  upperDisplayElement.classList.add(`hidden`);
-});
+clearAllElement.addEventListener(`click`, resetValues);
 
 //delete the actual element
 eraseElement.addEventListener(`click`, function () {
@@ -111,7 +134,22 @@ eraseElement.addEventListener(`click`, function () {
 //FUNCTIONS
 
 //return operation calculus
-function processCalculus(num1, num2, sign) {
+function processCalculus(num1, num2 = 0, sign) {
   console.log(`complete`);
   return eval(`${num1} ${sign} ${num2}`);
+}
+
+function resetValues() {
+  lastValue = "";
+  operationResult = "";
+  calculationNumber = true;
+  actualValue = "";
+  outputElement.value = 0;
+  upperDisplayElement.value = "";
+  upperDisplayElement.classList.add(`hidden`);
+}
+
+function processInvalidOutput() {
+  invalidExpression = true;
+  outputElement.value = `Invalid expression!`;
 }
