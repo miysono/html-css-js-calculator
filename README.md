@@ -2,7 +2,7 @@
 Calculator made with HTML/CSS/JavaScript
 
 
-Small HTML/CSS/JS Project - Calculator with Basic functionality
+Small HTML/CSS/JS Project - Calculator similar to windows-built-in calculator
 
 
 
