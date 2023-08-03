@@ -1,9 +1,6 @@
 "use strict";
 
-//WHAT TO DO NEXT / FIXES
-//CHAGNE THE SIGN IF THE USER DECIDES TO!
 //cleaner code
-//if invalid excception -> strange behavior->disable signs -> NaN exc -> -INFINITY
 
 //MATH SINGS ELEMENTS
 const mathSigns = document.querySelectorAll(`#sign`);
@@ -61,6 +58,7 @@ mathSigns.forEach((sign) => {
       actualValue = "";
       calculationNumber = false;
       lastSignValue = sign.value;
+      outputElement.value = "";
     }
     //check for actual calculus
     else if (actualValue) {
@@ -69,16 +67,21 @@ mathSigns.forEach((sign) => {
       lastValue = processCalculus(lastValue, actualValue, lastSignValue);
       console.log(operationResult);
       //check for invalid expression
-      if (operationResult == Infinity || operationResult == NaN)
+      if (operationResult == Infinity || isNaN(operationResult)) {
         processInvalidOutput();
-      else {
+        buttonDeactivate(mathSigns);
+      } else {
         //display values
         upperDisplayElement.value = `${operationResult} ${sign.value}`;
-        outputElement.value = operationResult;
+        outputElement.value = "";
         //reassign values
         actualValue = "";
         lastSignValue = sign.value;
       }
+    } //if user wants to change the sign!
+    else {
+      lastSignValue = sign.value;
+      upperDisplayElement.value = `${lastValue} ${lastSignValue}`;
     }
   });
 });
