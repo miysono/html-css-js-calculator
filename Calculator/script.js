@@ -3,6 +3,7 @@
 //WHAT TO DO NEXT / FIXES
 //CHAGNE THE SIGN IF THE USER DECIDES TO!
 //cleaner code
+//if invalid excception -> strange behavior->disable signs -> NaN exc -> -INFINITY
 
 //MATH SINGS ELEMENTS
 const mathSigns = document.querySelectorAll(`#sign`);
@@ -22,17 +23,17 @@ let actualValue = "";
 let lastValue = "";
 let operationResult = "";
 let lastSignValue = "";
-
 //Checkers
 let invalidExpression = false;
 let calculationNumber = true; //checks if it is the first calculation (beginning/after operation)
-
+let isDisabled = false;
 //START OPERATIONS
 upperDisplayElement.classList.add(`hidden`);
 
 //crate number
 numbers.forEach((number) => {
   number.addEventListener(`click`, function () {
+    if (isDisabled == true) buttonActivate(mathSigns);
     //check for invalid expresion - like(NaN)
     if (invalidExpression) {
       resetValues();
@@ -51,7 +52,6 @@ mathSigns.forEach((sign) => {
   sign.addEventListener(`click`, function () {
     //Update the value of the upper calculation BAR
     upperDisplayElement.classList.remove(`hidden`);
-
     //check for the FIRST calculation
     if (calculationNumber) {
       //make the expression valid so the program can work after equal sign - like math signs
@@ -85,6 +85,7 @@ mathSigns.forEach((sign) => {
 
 //BACK ELEMENT FUNCTIONALITY
 deleteOneElement.addEventListener(`click`, function () {
+  if (isDisabled) buttonActivate(mathSigns);
   actualValue = Number(actualValue);
   actualValue = Math.floor(actualValue / 10);
   if (actualValue === 0) {
@@ -101,28 +102,22 @@ equalElement.addEventListener(`click`, function () {
   if (actualValue !== "" && lastValue !== "") {
     //change to actual value so the sign listener will convert it back in the first part
     actualValue = processCalculus(lastValue, actualValue, lastSignValue);
+    console.log(actualValue);
     //now check if the value is invalid or not
-    if (actualValue == Infinity || actualValue == NaN) processInvalidOutput();
-    else {
+    if (Math.abs(actualValue) == Infinity || isNaN(actualValue)) {
+      processInvalidOutput();
+      buttonDeactivate(mathSigns);
+    } else {
       //Element changing
-      outputElement.value = actualValue;
-      upperDisplayElement.classList.add(`hidden`);
-      //mark true so that the program will convert => in sign event listener -> wait for the next number
-      calculationNumber = true;
-      //also mark true to make sure if the user wants a new operation to reset -> number event listner
-      invalidExpression = true;
-      //assign the last value so -> else statement -> actual value = calculus -> always return that -> actual value will be last value in sign listener
-      lastValue = "";
+      processExceptions();
     }
   }
   //now process the example of 247/ and then press equal
   else {
-    //value will now not be changed
-    outputElement.value = Number(lastValue + actualValue);
-    upperDisplayElement.classList.add(`hidden`);
-    //same as upper
-    calculationNumber = true;
-    invalidExpression = true;
+    //reasign the actual value -> it will become last value in sign event list
+    actualValue = lastValue + actualValue;
+    //same as else statement
+    processExceptions();
   }
 });
 
@@ -131,6 +126,7 @@ clearAllElement.addEventListener(`click`, resetValues);
 
 //delete the actual element
 eraseElement.addEventListener(`click`, function () {
+  if (isDisabled) buttonActivate(mathSigns);
   actualValue = "";
   outputElement.value = actualValue;
 });
@@ -144,11 +140,12 @@ function processCalculus(num1, num2 = 0, sign) {
 }
 
 function resetValues() {
+  if (isDisabled) buttonActivate(mathSigns);
   lastValue = "";
   operationResult = "";
   calculationNumber = true;
   actualValue = "";
-  outputElement.value = 0;
+  outputElement.value = "";
   upperDisplayElement.value = "";
   upperDisplayElement.classList.add(`hidden`);
 }
@@ -156,4 +153,33 @@ function resetValues() {
 function processInvalidOutput() {
   invalidExpression = true;
   outputElement.value = `Invalid expression!`;
+  upperDisplayElement.classList.add(`hidden`);
+}
+
+function processExceptions() {
+  outputElement.value = actualValue;
+  upperDisplayElement.classList.add(`hidden`);
+  //mark true so that the program will convert => in sign event listener -> wait for the next number
+  calculationNumber = true;
+  //also mark true to make sure if the user wants a new operation to reset -> number event listner
+  invalidExpression = true;
+  //assign the last value so -> else statement -> actual value = calculus -> always return that -> actual value will be last value in sign listener
+  lastValue = "";
+}
+
+function buttonDeactivate(buttons) {
+  buttons.forEach(function (elem) {
+    elem.disabled = true;
+    elem.classList.add(`deactivated`);
+  });
+  isDisabled = true;
+}
+function buttonActivate(buttons) {
+  console.log(isDisabled);
+  buttons.forEach(function (elem) {
+    elem.disabled = false;
+    elem.classList.remove(`deactivated`);
+  });
+  isDisabled = false;
+  resetValues();
 }

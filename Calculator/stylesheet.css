@@ -81,3 +81,15 @@ body {
 .hidden {
   opacity: 0;
 }
+
+.deactivated {
+  opacity: 0.5;
+  color: black !important;
+  background-color: rgba(0, 0, 0, 0.384) !important;
+  box-shadow: 0 8px 25px rgb(0, 0, 0) !important;
+}
+
+.deactivated:hover {
+  scale: 100% !important;
+  background-color: rgba(0, 0, 0, 0.384) !important;
+}
